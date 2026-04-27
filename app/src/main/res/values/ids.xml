@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="server_config_view" type="id" />
+    <item name="exit_view" type="id" />
+    <item name="info_view" type="id" />
+    <item name="update_view" type="id" />
+    <item name="connection_status_view" type="id" />
+    <item name="connection_info_view" type="id" />
+</resources>

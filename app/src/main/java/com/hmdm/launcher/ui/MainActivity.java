@@ -80,6 +80,7 @@ import com.hmdm.launcher.R;
 import com.hmdm.launcher.databinding.ActivityMainBinding;
 import com.hmdm.launcher.databinding.DialogAccessibilityServiceBinding;
 import com.hmdm.launcher.databinding.DialogAdministratorModeBinding;
+import com.hmdm.launcher.databinding.DialogConfigureServerBinding;
 import com.hmdm.launcher.databinding.DialogEnterPasswordBinding;
 import com.hmdm.launcher.databinding.DialogFileDownloadingFailedBinding;
 import com.hmdm.launcher.databinding.DialogHistorySettingsBinding;
@@ -335,6 +336,9 @@ public class MainActivity
     private int exitTapCount = 0;
     private ImageView infoView;
     private ImageView updateView;
+    private ImageView serverConfigView;
+    private ImageView connectionStatusView;
+    private ImageView connectionInfoView;
 
     private View statusBarView;
     private View rightToolbarView;
@@ -979,10 +983,107 @@ public class MainActivity
         return ProUtils.checkAccessibilityService(this);
     }
 
-    private void createLauncherButtons() {
+   private void createLauncherButtons() {
         createExitButton();
         createInfoButton();
         createUpdateButton();
+        createServerConfigButton();
+        createConnectionStatusButton();
+        createConnectionInfoButton();
+    }
+
+    private void createServerConfigButton() {
+        Log.d(Const.LOG_TAG, "createServerConfigButton");
+        serverConfigView = createManageButton(R.drawable.ic_system_update_opaque_24dp, R.drawable.ic_system_update_black_24dp,
+                (int)(2.05f * getResources().getDimensionPixelOffset(R.dimen.info_icon_margin)));
+        serverConfigView.setId(R.id.server_config_view);
+        serverConfigView.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if (id == R.id.server_config_view) {
+            showConfigureServerDialog();
+        } else if (id == R.id.exit_view) {
+            // Exit button logic is in createExitButton
+        } else if (id == R.id.connection_status_view) {
+            showConnectionStatusDialog();
+        } else if (id == R.id.connection_info_view) {
+            showConnectionInfoDialog();
+        } else if (v.equals(infoView)) {
+            createAndShowInfoDialog();
+        } else if (v.equals(updateView)) {
+            if (enterDeviceIdDialog != null && enterDeviceIdDialog.isShowing()) {
+                Log.i(Const.LOG_TAG, "Occasional update request when device info is entered, ignoring!");
+                return;
+            }
+            Log.i(Const.LOG_TAG, "updating config on request");
+            binding.loading.setVisibility(View.VISIBLE);
+            binding.setShowContent(false);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            updateConfig(true);
+        }
+    }
+
+    private void showConfigureServerDialog() {
+        Dialog dialog = new Dialog(this);
+        DialogConfigureServerBinding binding = DataBindingUtil.inflate(
+                LayoutInflater.from(this),
+                R.layout.dialog_configure_server,
+                null,
+                false
+        );
+        dialog.setCancelable(false);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(binding.getRoot());
+
+        binding.editHost.setText(settingsHelper.getHost());
+        binding.editPort.setText(String.valueOf(settingsHelper.getPort()));
+
+        binding.btnCancel.setOnClickListener(view -> dialog.dismiss());
+
+        binding.btnOk.setOnClickListener(view -> {
+            String host = binding.editHost.getText().toString().trim();
+            String portStr = binding.editPort.getText().toString().trim();
+            int port = 80;
+
+            try {
+                if (!portStr.isEmpty()) {
+                    port = Integer.parseInt(portStr);
+                }
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Invalid port", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (host.isEmpty()) {
+                Toast.makeText(this, "Host cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            settingsHelper.setHost(host);
+            settingsHelper.setPort(port);
+            // Also update the base URL to include host and port
+            // Since getBaseUrl() now uses host and port, we can just clear the old base url 
+            // to force it to use host/port logic, or update it.
+            // But wait, getBaseUrl() priority logic is: if host is set, use it.
+            // So we should also clear the old base url to avoid confusion if the user wants to go back to a full URL.
+            // Actually, the requirement is to use host and port.
+            
+            // For now, let's just clear the base URL so getBaseUrl() uses host/port
+            settingsHelper.setBaseUrl(""); 
+
+            dialog.dismiss();
+            
+            // Re-start or update config
+            updateConfig(true);
+            // To apply changes fully, a restart might be needed, but let's try updateConfig first.
+            finish();
+            startActivity(new Intent(this, MainActivity.class));
+        });
+
+        dialog.show();
     }
 
     private void createButtons() {
@@ -1025,6 +1126,32 @@ public class MainActivity
         }
     }
 
+    private void createConnectionStatusButton() {
+        connectionStatusView = createManageButton(R.drawable.ic_info_opaque_24dp, R.drawable.ic_info_black_24dp,
+                (int)(3.05f * getResources().getDimensionPixelOffset(R.dimen.info_icon_margin)));
+        connectionStatusView.setId(R.id.connection_status_view);
+        connectionStatusView.setOnClickListener(this);
+    }
+
+    private void createConnectionInfoButton() {
+        connectionInfoView = createManageButton(R.drawable.ic_info_opaque_24dp, R.drawable.ic_info_black_24dp,
+                (int)(4.05f * getResources().getDimensionPixelOffset(R.dimen.info_icon_margin)));
+        connectionInfoView.setId(R.id.connection_info_view);
+        connectionInfoView.setOnClickListener(this);
+    }
+
+    private void showConnectionStatusDialog() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        String status = (activeNetwork != null && activeNetwork.isConnected()) ? "Connected" : "Disconnected";
+        new AlertDialog.Builder(this).setTitle("Connection Status").setMessage(status).setPositiveButton("OK", null).show();
+    }
+
+    private void showConnectionInfoDialog() {
+        String info = "Host: " + settingsHelper.getHost() + "\nPort: " + settingsHelper.getPort();
+        new AlertDialog.Builder(this).setTitle("Connection Info").setMessage(info).setPositiveButton("OK", null).show();
+    }
+
     private void startLauncher() {
         createButtons();
 
@@ -1037,6 +1164,9 @@ public class MainActivity
         } else if (!settingsHelper.isBaseUrlSet() && BuildConfig.REQUEST_SERVER_URL) {
             // For common public version, here's an option to change the server
             createAndShowServerDialog(false, settingsHelper.getBaseUrl(), settingsHelper.getServerProject());
+        } else if (settingsHelper.getBaseUrl().isEmpty()) {
+            // If no base URL is set, ask for it
+            createAndShowServerDialog(true, "", settingsHelper.getServerProject());
         } else if ( settingsHelper.getDeviceId().length() == 0 ) {
             Log.d(Const.LOG_TAG, "Device ID is empty");
             Utils.autoGrantPhonePermission(this);
@@ -1318,6 +1448,7 @@ public class MainActivity
             return;
         }
         exitView = createManageButton(R.drawable.ic_vpn_key_opaque_24dp, R.drawable.ic_vpn_key_black_24dp, 0);
+        exitView.setId(R.id.exit_view);
         exitView.setOnClickListener(view -> {
             if (view.hasFocus()) {
                 // 6 subsequent taps within 3 secs open the hidden password view
@@ -1344,6 +1475,7 @@ public class MainActivity
         }
         infoView = createManageButton(R.drawable.ic_info_opaque_24dp, R.drawable.ic_info_black_24dp,
                 getResources().getDimensionPixelOffset(R.dimen.info_icon_margin));
+        infoView.setId(R.id.info_view);
         infoView.setOnClickListener(this);
     }
 
@@ -1353,6 +1485,7 @@ public class MainActivity
         }
         updateView = createManageButton(R.drawable.ic_system_update_opaque_24dp, R.drawable.ic_system_update_black_24dp,
                 (int)(2.05f * getResources().getDimensionPixelOffset(R.dimen.info_icon_margin)));
+        updateView.setId(R.id.update_view);
         updateView.setOnClickListener(this);
     }
 
@@ -2658,23 +2791,6 @@ public class MainActivity
     public boolean onLongClick( View v ) {
         createAndShowEnterPasswordDialog();
         return true;
-    }
-
-    @Override
-    public void onClick( View v ) {
-        if (v.equals(infoView)) {
-            createAndShowInfoDialog();
-        } else if (v.equals(updateView)) {
-            if (enterDeviceIdDialog != null && enterDeviceIdDialog.isShowing()) {
-                Log.i(Const.LOG_TAG, "Occasional update request when device info is entered, ignoring!");
-                return;
-            }
-            Log.i(Const.LOG_TAG, "updating config on request");
-            binding.loading.setVisibility(View.VISIBLE);
-            binding.setShowContent(false);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            updateConfig(true);
-        }
     }
 
     private void postDelayedSystemSettingDialog(final String message, final Intent settingsIntent) {

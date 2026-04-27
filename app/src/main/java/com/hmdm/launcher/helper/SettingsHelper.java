@@ -39,8 +39,10 @@ import java.util.Set;
 public class SettingsHelper {
 
     private static final String PREFERENCES_ID = ".helpers.PREFERENCES";
-    private static final String PREF_KEY_BASE_URL = ".helpers.BASE_URL";
+   private static final String PREF_KEY_BASE_URL = ".helpers.BASE_URL";
     private static final String PREF_KEY_SECONDARY_BASE_URL = ".helpers.SECONDARY_BASE_URL";
+    private static final String PREF_KEY_SERVER_HOST = ".helpers.SERVER_HOST";
+    private static final String PREF_KEY_SERVER_PORT = ".helpers.SERVER_PORT";
     private static final String PREF_KEY_SERVER_PROJECT = ".helpers.SERVER_PROJECT";
     private static final String PREF_KEY_DEVICE_ID = ".helpers.DEVICE_ID";
     private static final String PREF_KEY_CUSTOMER = ".helpers.CUSTOMER";
@@ -133,11 +135,35 @@ public class SettingsHelper {
     }
 
     public String getBaseUrl() {
+        String host = getHost();
+        if (host != null && !host.isEmpty()) {
+            String port = String.valueOf(getPort());
+            if (port.equals("80") || port.equals("443")) {
+                return host;
+            }
+            return host + ":" + port;
+        }
         return sharedPreferences.getString(PACKAGE_NAME + PREF_KEY_BASE_URL, BuildConfig.BASE_URL );
     }
 
     public boolean setBaseUrl( String baseUrl ) {
         return sharedPreferences.edit().putString(PACKAGE_NAME + PREF_KEY_BASE_URL, baseUrl ).commit();
+    }
+
+    public String getHost() {
+        return sharedPreferences.getString(PACKAGE_NAME + PREF_KEY_SERVER_HOST, "");
+    }
+
+    public boolean setHost(String host) {
+        return sharedPreferences.edit().putString(PACKAGE_NAME + PREF_KEY_SERVER_HOST, host).commit();
+    }
+
+    public int getPort() {
+        return sharedPreferences.getInt(PACKAGE_NAME + PREF_KEY_SERVER_PORT, 80);
+    }
+
+    public boolean setPort(int port) {
+        return sharedPreferences.edit().putInt(PACKAGE_NAME + PREF_KEY_SERVER_PORT, port).commit();
     }
 
     public String getSecondaryBaseUrl() {
