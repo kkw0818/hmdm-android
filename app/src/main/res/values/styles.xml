@@ -19,6 +19,178 @@
 
 <resources>
 
+    <style name="ts_google_btn_text">
+        <item name="android:fontFamily">@font/noto_sans_medium</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">14dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="ts_headline_68_72">
+        <item name="android:fontFamily">@font/ipin_font_800</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">68dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">72dp</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="ts_headline_40_48">
+        <item name="android:fontFamily">@font/ipin_font_800</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">40dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">48dp</item>
+    </style>
+
+    <style name="ts_title_32_36">
+        <item name="android:fontFamily">@font/ipin_font_700</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">32dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">36dp</item>
+    </style>
+
+    <style name="ts_title_24_28">
+        <item name="android:fontFamily">@font/ipin_font_700</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">24dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">28dp</item>
+    </style>
+
+    <style name="ts_title_20_24">
+        <item name="android:fontFamily">@font/ipin_font_700</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:lineHeight">24dp</item>
+    </style>
+
+    <style name="ts_title_16_24">
+        <item name="android:fontFamily">@font/ipin_font_700</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">24dp</item>
+    </style>
+
+    <style name="ts_title_12_16">
+        <item name="android:fontFamily">@font/ipin_font_700</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">12dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">16dp</item>
+    </style>
+
+    <style name="ts_title_14_16">
+        <item name="android:fontFamily">@font/ipin_font_700</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">14dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">16dp</item>
+    </style>
+
+    <style name="ts_title_10_16">
+        <item name="android:fontFamily">@font/ipin_font_700</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">10dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">16dp</item>
+    </style>
+
+    <style name="ts_label_20_24">
+        <item name="android:fontFamily">@font/ipin_font_600</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">24dp</item>
+    </style>
+
+    <style name="ts_label_16_24">
+        <item name="android:fontFamily">@font/ipin_font_600</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">24dp</item>
+    </style>
+
+    <style name="ts_label_14_16">
+        <item name="android:fontFamily">@font/ipin_font_600</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">14dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">16dp</item>
+    </style>
+
+    <style name="ts_label_12_16">
+        <item name="android:fontFamily">@font/ipin_font_600</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">12dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">16dp</item>
+    </style>
+
+    <style name="ts_label_8_16">
+        <item name="android:fontFamily">@font/ipin_font_800</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">8dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">16dp</item>
+    </style>
+
+    <style name="ts_body_24_40">
+        <item name="android:fontFamily">@font/ipin_font_500</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">24dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">40dp</item>
+    </style>
+
+    <style name="ts_body_20_24">
+        <item name="android:fontFamily">@font/ipin_font_500</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">24dp</item>
+    </style>
+
+    <style name="ts_body_16_24">
+        <item name="android:fontFamily">@font/ipin_font_500</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">24dp</item>
+    </style>
+
+    <style name="ts_body_14_20">
+        <item name="android:fontFamily">@font/ipin_font_500</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">14dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">20dp</item>
+    </style>
+
+    <style name="ts_body_12_20">
+        <item name="android:fontFamily">@font/ipin_font_500</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">12dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">20dp</item>
+    </style>
+
+    <style name="ts_body_10_16">
+        <item name="android:fontFamily">@font/ipin_font_500</item>
+        <item name="android:textColor">@color/n_900</item>
+        <item name="android:textSize">10dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:lineHeight">16dp</item>
+    </style>
+
+    <style name="TransparentPointerEditText">
+        <item name="colorControlActivated">@android:color/transparent</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->

@@ -19,6 +19,63 @@
   -->
 
 <resources>
+
+    <color name="transparent">#00000000</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="green">#FF4CAF50</color>
+    <color name="active">#FF00EDDF</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="primary">#FF5959FF</color>
+    <color name="n_100_50">#88C7CBD9</color>
+    <color name="p_gradient">#FF42A4FF</color>
+    <color name="p_50">#FFE8ECFF</color>
+    <color name="p_100">#FFBDC7FF</color>
+    <color name="p_200">#FF8F9AFF</color>
+    <color name="p_300">#FF6E75FF</color>
+    <color name="p_400">#FF5959FF</color>
+    <color name="p_500">#FF4640E5</color>
+    <color name="p_600">#FF3A36B2</color>
+    <color name="p_700">#FF2E2D87</color>
+    <color name="p_800">#FF282461</color>
+    <color name="p_900">#FF262045</color>
+
+    <color name="s_050">#FFE0F0FF</color>
+    <color name="s_100">#FFBDDEFF</color>
+    <color name="s_200">#FF96C9FF</color>
+    <color name="s_300">#FF6BB5FF</color>
+    <color name="s_400">#FF42A4FF</color>
+    <color name="s_500">#FF1D8FF9</color>
+    <color name="s_600">#FF0972DB</color>
+    <color name="s_700">#FF0555B2</color>
+    <color name="s_800">#FF083A85</color>
+    <color name="s_900">#FF0A2A69</color>
+
+    <color name="n_000">#FFFFFFFF</color>
+    <color name="n_050">#FFF2F3F7</color>
+    <color name="n_100">#FFDFE1EB</color>
+    <color name="n_200">#FFC7CBD9</color>
+    <color name="n_300">#FFAEB2C2</color>
+    <color name="n_400">#FF9297A8</color>
+    <color name="n_500">#FF717585</color>
+    <color name="n_600">#FF5B5E6B</color>
+    <color name="n_700">#FF444652</color>
+    <color name="n_800">#FF343640</color>
+    <color name="n_900">#FF292B33</color>
+    <color name="e_50">#FFFFF0EE</color>
+    <color name="e_100">#FFFFD8D4</color>
+    <color name="e_200">#FFFFB3AB</color>
+    <color name="e_300">#FFFF8C80</color>
+    <color name="e_400">#FFFF6B5C</color>
+    <color name="e_500">#FFEB5042</color>
+    <color name="e_600">#FFBF3932</color>
+    <color name="e_700">#FF912926</color>
+    <color name="e_800">#FF6B1B1A</color>
+    <color name="e_900">#FF571111</color>
+
     <color name="colorPrimary">#607D8B</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#87d3e1</color>

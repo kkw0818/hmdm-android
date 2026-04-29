@@ -34,6 +34,8 @@
         android:layout_centerInParent="true">
 
         <TextView
+            style="@style/ts_body_12_20"
+            android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -41,16 +43,17 @@
             android:id="@+id/message"/>
 
         <TextView
+            style="@style/ts_body_12_20"
+            android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_margin="@dimen/activity_vertical_margin"
-            android:textSize="@dimen/title_text_size"
-            android:textStyle="bold"
-            android:textColor="@color/white"
             android:id="@+id/package_id"/>
 
         <TextView
+            style="@style/ts_body_12_20"
+            android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -64,17 +67,16 @@
             android:layout_marginTop="@dimen/activity_horizontal_margin">
 
             <Button
-                android:layout_width="@dimen/block_window_button_width"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/layout_application_not_allowed_continue"
                 android:textSize="@dimen/button_text_size"
                 android:text="@string/dialog_app_not_allowed_close"/>
 
             <Button
-                android:layout_width="@dimen/block_window_button_width"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/layout_application_not_allowed_admin"
-                android:textSize="@dimen/button_text_size"
                 android:text="@string/dialog_app_not_allowed_admin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"/>
 
