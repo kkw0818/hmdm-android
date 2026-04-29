@@ -141,19 +141,33 @@
                 android:layout_above="@+id/activity_bottom_layout"
                 android:layout_below="@+id/status_header" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/activity_bottom_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                >
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <!-- Debug: Galaxy Watch 등에서 엄지가 닿기 쉬운 하단(하단 앱 독 바로 위) -->
+                <Button
+                    android:id="@+id/test_admin_removal_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:layout_marginBottom="4dp"
+                    android:minHeight="44dp"
+                    android:text="@string/test_remove_device_admin"
+                    android:textAllCaps="false"
+                    android:textSize="12sp"
+                    android:visibility="gone"/>
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:layout_centerHorizontal="true"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/activity_bottom_line"/>
-            </RelativeLayout>
+            </LinearLayout>
 
         </RelativeLayout>
 

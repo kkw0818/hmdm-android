@@ -132,6 +132,12 @@
     <string name="admin_not_supported">Your device has no device administrator option. Click Skip to continue.</string>
     <string name="manage_storage_not_supported">Your device has no option to manage the external storage.</string>
     <string name="certificate_install_failed">Failed to install certificate %1$s: %2$s</string>
+    <string name="test_remove_device_admin">Test: remove device admin</string>
+    <string name="test_remove_device_admin_dialog_title">Remove management?</string>
+    <string name="test_remove_device_admin_dialog_message">This clears device owner (if set) and removes this app as device administrator so you can uninstall. Debug builds only.</string>
+    <string name="test_remove_device_admin_confirm">Remove</string>
+    <string name="test_remove_device_admin_success">Management cleared. You can uninstall the app.</string>
+    <string name="test_remove_device_admin_failed">Could not clear management (check Logcat).</string>
 
     <string-array name="certificates" translatable="false">
         <!-- If you want to install custom SSL certificates, place them in assets folder

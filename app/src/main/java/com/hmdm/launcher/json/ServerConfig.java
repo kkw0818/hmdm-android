@@ -403,8 +403,9 @@ public class ServerConfig {
         this.keepaliveTime = keepaliveTime;
     }
 
+    /** When unset or null, location updates are off (same as {@code "stop"}). */
     public String getRequestUpdates() {
-        return requestUpdates;
+        return requestUpdates != null ? requestUpdates : "stop";
     }
 
     public void setRequestUpdates(String requestUpdates) {

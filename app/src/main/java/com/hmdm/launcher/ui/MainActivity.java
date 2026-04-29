@@ -67,6 +67,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import android.content.ComponentName;
 import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -415,6 +416,8 @@ public class MainActivity
 
         settingsHelper.setAppStartTime(System.currentTimeMillis());
 
+        initTestAdminRemovalButton();
+
         // settingsHelper.getImei() is "" by default, it is non-null
         if (Utils.isDeviceOwner(this) && "".equals(settingsHelper.getImei())) {
             settingsHelper.setImei(DeviceInfoProvider.getImei(this, 0));
@@ -482,6 +485,35 @@ public class MainActivity
         if (preferences == null) {
             preferences = getSharedPreferences(Const.PREFERENCES, MODE_PRIVATE);
         }
+        initTestAdminRemovalButton();
+    }
+
+    private void initTestAdminRemovalButton() {
+        if (binding == null) {
+            return;
+        }
+        View button = binding.testAdminRemovalButton;
+        if (!BuildConfig.DEBUG) {
+            button.setVisibility(View.GONE);
+            button.setOnClickListener(null);
+            return;
+        }
+        button.setVisibility(View.VISIBLE);
+        button.setOnClickListener(v -> confirmTestAdminRemoval());
+    }
+
+    private void confirmTestAdminRemoval() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.test_remove_device_admin_dialog_title)
+                .setMessage(R.string.test_remove_device_admin_dialog_message)
+                .setPositiveButton(R.string.test_remove_device_admin_confirm, (dialog, which) -> {
+                    boolean ok = Utils.tryClearDeviceManagementForTesting(this);
+                    Toast.makeText(this,
+                            ok ? R.string.test_remove_device_admin_success : R.string.test_remove_device_admin_failed,
+                            Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton(R.string.main_activity_cancel, null)
+                .show();
     }
 
     @Override
@@ -1527,7 +1559,7 @@ public class MainActivity
     private void startLocationService() {
         ServerConfig config = settingsHelper.getConfig();
         Intent intent = new Intent(this, LocationService.class);
-        intent.setAction(config.getRequestUpdates() != null ? config.getRequestUpdates() : LocationService.ACTION_STOP);
+        intent.setAction(config.getRequestUpdates());
         startService(intent);
     }
 
@@ -1972,13 +2004,21 @@ public class MainActivity
                 bottomAppListAdapter.setSpanCount(spanCount);
 
                 binding.activityBottomLayout.setVisibility(View.VISIBLE);
+                binding.activityBottomLine.setVisibility(View.VISIBLE);
                 binding.activityBottomLine.setLayoutManager(new GridLayoutManager(this, bottomAppCount < spanCount ? bottomAppCount : spanCount));
                 binding.activityBottomLine.setAdapter(bottomAppListAdapter);
                 bottomAppListAdapter.notifyDataSetChanged();
             } else {
                 bottomAppListAdapter = null;
-                binding.activityBottomLayout.setVisibility(View.GONE);
+                binding.activityBottomLine.setAdapter(null);
+                if (BuildConfig.DEBUG) {
+                    binding.activityBottomLayout.setVisibility(View.VISIBLE);
+                    binding.activityBottomLine.setVisibility(View.GONE);
+                } else {
+                    binding.activityBottomLayout.setVisibility(View.GONE);
+                }
             }
+            initTestAdminRemovalButton();
         }
         binding.loading.setVisibility(View.GONE);
         binding.setShowContent(true);

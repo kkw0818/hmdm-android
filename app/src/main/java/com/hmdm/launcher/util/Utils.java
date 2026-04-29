@@ -379,6 +379,31 @@ public class Utils {
         }
     }
 
+    /**
+     * Clears device owner (if applicable) and removes the active device admin component.
+     * Intended for debug builds so the app can be uninstalled without adb.
+     */
+    public static boolean tryClearDeviceManagementForTesting(Context context) {
+        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return false;
+        }
+        String pkg = context.getPackageName();
+        ComponentName admin = LegacyUtils.getAdminComponentName(context);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && dpm.isDeviceOwnerApp(pkg)) {
+                dpm.clearDeviceOwnerApp(pkg);
+            }
+            if (dpm.isAdminActive(admin)) {
+                dpm.removeActiveAdmin(admin);
+            }
+            return true;
+        } catch (Exception e) {
+            RemoteLogger.log(context, Const.LOG_WARN, "tryClearDeviceManagementForTesting: " + e.getMessage());
+            return false;
+        }
+    }
+
     public static boolean factoryReset(Context context) {
         try {
             DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
