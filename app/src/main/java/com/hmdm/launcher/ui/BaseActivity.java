@@ -126,16 +126,6 @@ public class BaseActivity extends AppCompatActivity {
                 variantsList.add(serial);
             }
         }
-        if (variantsList.size() > 0) {
-            String[] variantsArray = variantsList.toArray(new String[variantsList.size()]);
-            enterDeviceIdDialogBinding.deviceId.setThreshold(0);
-            enterDeviceIdDialogBinding.deviceId.setAdapter(new ArrayAdapter<String>(this,
-                    android.R.layout.select_dialog_item, variantsArray));
-        } else {
-            enterDeviceIdDialogBinding.showDeviceIdVariants.setVisibility(View.GONE);
-        }
-
-        enterDeviceIdDialogBinding.showDeviceIdQrCode.setVisibility(View.VISIBLE);
 
         enterDeviceIdDialog.setContentView( enterDeviceIdDialogBinding.getRoot() );
         enterDeviceIdDialog.setOnShowListener(dialog -> {
@@ -389,21 +379,8 @@ public class BaseActivity extends AppCompatActivity {
 
         SettingsHelper settingsHelper = SettingsHelper.getInstance(this);
 
-        String phone = DeviceInfoProvider.getPhoneNumber(this);
-        if (phone == null || phone.equals("")) {
-            phone = settingsHelper.getConfig() != null ? settingsHelper.getConfig().getPhone() : "";
-        }
-        dialogDeviceInfoBinding.setPhone(phone);
-
-        String imei = DeviceInfoProvider.getImei(this);
-        if (imei == null || imei.equals("")) {
-            imei = settingsHelper.getConfig() != null ? settingsHelper.getConfig().getImei() : "";
-        }
-        dialogDeviceInfoBinding.setImei(imei);
-
         String hideIdsStr = settingsHelper.getAppPreference(getPackageName(), "hide_ids");
         if ("1".equals(hideIdsStr) || "true".equalsIgnoreCase(hideIdsStr)) {
-            dialogDeviceInfoBinding.imeiLayout.setVisibility(View.GONE);
             dialogDeviceInfoBinding.serialLayout.setVisibility(View.GONE);
         }
 

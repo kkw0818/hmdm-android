@@ -63,7 +63,7 @@
                 android:layout_marginLeft="4dp"
                 android:layout_weight="1"
                 android:onClick="continueStorage"
-                android:text="@string/dialog_history_settings_continue"
+                android:text="허용 후 계속"
                 android:textSize="@dimen/button_text_size" />
 
         </LinearLayout>
