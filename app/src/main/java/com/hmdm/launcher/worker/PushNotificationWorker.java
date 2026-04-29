@@ -52,18 +52,36 @@ import retrofit2.Response;
 
 public class PushNotificationWorker extends Worker {
 
-    // Minimal interval is 15 minutes as per docs
-    public static final int FIRE_PERIOD_MINS = 15;
+    /** PeriodicWorkRequest minimum; used for polling and unknown push modes. */
+    public static final int FIRE_PERIOD_MINS_POLLING = 15;
+    /** Longer interval when MQTT handles push (backup ping-death / config refresh). */
+    public static final int FIRE_PERIOD_MINS_MQTT = 30;
+
+    /** @deprecated Use {@link #resolveFirePeriodMinutes(Context)} or {@link #FIRE_PERIOD_MINS_POLLING}. */
+    public static final int FIRE_PERIOD_MINS = FIRE_PERIOD_MINS_POLLING;
 
     // Interval to update configuration to avoid losing device due to push failure
     public static final long CONFIG_UPDATE_INTERVAL = 3600000l;
 
     private static final String WORK_TAG_PERIODIC = "com.hmdm.launcher.WORK_TAG_PUSH_PERIODIC";
 
+    public static int resolveFirePeriodMinutes(Context context) {
+        SettingsHelper sh = SettingsHelper.getInstance(context.getApplicationContext());
+        if (sh != null && sh.getConfig() != null) {
+            String pushOptions = sh.getConfig().getPushOptions();
+            if (ServerConfig.PUSH_OPTIONS_MQTT_WORKER.equals(pushOptions)
+                    || ServerConfig.PUSH_OPTIONS_MQTT_ALARM.equals(pushOptions)) {
+                return FIRE_PERIOD_MINS_MQTT;
+            }
+        }
+        return FIRE_PERIOD_MINS_POLLING;
+    }
+
     public static void schedule(Context context) {
-        RemoteLogger.log(context, Const.LOG_DEBUG, "Push notifications enqueued: " + FIRE_PERIOD_MINS + " mins");
+        int periodMins = resolveFirePeriodMinutes(context);
+        RemoteLogger.log(context, Const.LOG_DEBUG, "Push notifications enqueued: " + periodMins + " mins");
         PeriodicWorkRequest queryRequest =
-                new PeriodicWorkRequest.Builder(PushNotificationWorker.class, FIRE_PERIOD_MINS, TimeUnit.MINUTES)
+                new PeriodicWorkRequest.Builder(PushNotificationWorker.class, periodMins, TimeUnit.MINUTES)
                         .addTag(Const.WORK_TAG_COMMON)
                         .build();
         WorkManager.getInstance(context.getApplicationContext()).enqueueUniquePeriodicWork(WORK_TAG_PERIODIC, ExistingPeriodicWorkPolicy.REPLACE, queryRequest);

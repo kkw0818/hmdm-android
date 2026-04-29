@@ -122,7 +122,7 @@ public class PushNotificationMqttWrapper {
         }
 
         client = new MqttAndroidClient(context, serverUri, deviceId);
-        client.setTraceEnabled(true);
+        client.setTraceEnabled(BuildConfig.DEBUG);
         client.setDefaultMessageListener(mqttMessageListener);
         setupDebugging(context);
 

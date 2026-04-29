@@ -33,6 +33,7 @@ import com.hmdm.launcher.json.ServerConfig;
 import com.hmdm.launcher.pro.worker.DetailedInfoWorker;
 import com.hmdm.launcher.server.ServerServiceKeeper;
 import com.hmdm.launcher.service.PushLongPollingService;
+import com.hmdm.launcher.worker.PushNotificationWorker;
 import com.hmdm.launcher.task.ConfirmDeviceResetTask;
 import com.hmdm.launcher.task.ConfirmPasswordResetTask;
 import com.hmdm.launcher.task.ConfirmRebootTask;
@@ -316,6 +317,9 @@ public class ConfigUpdater {
             }
         } else {
             checkFactoryReset();
+        }
+        if (BuildConfig.ENABLE_PUSH) {
+            PushNotificationWorker.schedule(context.getApplicationContext());
         }
     }
 
