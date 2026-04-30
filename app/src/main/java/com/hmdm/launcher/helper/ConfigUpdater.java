@@ -1,9 +1,6 @@
 package com.hmdm.launcher.helper;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -21,7 +18,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
 
-import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.hmdm.launcher.BuildConfig;
@@ -1282,25 +1278,20 @@ public class ConfigUpdater {
             PackageInstaller packageInstaller = null;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 packageInstaller = context.getPackageManager().getPackageInstaller();
-            }
-            PackageInstaller.SessionParams params = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                PackageInstaller.SessionParams params = null;
                 params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                params.setAppPackageName(packageName);
-            }
-            int sessionId = 0;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                sessionId = packageInstaller.createSession(params);
-            }
-            PackageInstaller.Session session = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                session = packageInstaller.openSession(sessionId);
-            }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                params.setAppPackageName(packageName);
+
+                int sessionId = 0;
+                sessionId = packageInstaller.createSession(params);
+
+                PackageInstaller.Session session = null;
+
+                session = packageInstaller.openSession(sessionId);
+
+
                 try (FileInputStream in = new FileInputStream(file);
                      OutputStream out = session.openWrite("COSU", 0, -1)) {
                     byte[] buffer = new byte[65536];
@@ -1310,25 +1301,24 @@ public class ConfigUpdater {
                     }
                     session.fsync(out);
                 }
-            }
 
-            // 완료 콜백용 PendingIntent — appInstallReceiver가 수신
-            Intent callbackIntent = new Intent(Const.ACTION_INSTALL_COMPLETE);
-            callbackIntent.putExtra(Const.PACKAGE_NAME, packageName);
-            PendingIntent callbackPendingIntent = PendingIntent.getBroadcast(
-                    context, sessionId, callbackIntent,
-                    PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT);
 
-            // 세션 커밋
-            // → STATUS_PENDING_USER_ACTION으로 confirmationIntent가 appInstallReceiver에 도착
-            // → registerAppInstallReceiver의 STATUS_PENDING_USER_ACTION 케이스에서 startActivity 처리
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                // 완료 콜백용 PendingIntent — appInstallReceiver가 수신
+                Intent callbackIntent = new Intent(Const.ACTION_INSTALL_COMPLETE);
+                callbackIntent.putExtra(Const.PACKAGE_NAME, packageName);
+                PendingIntent callbackPendingIntent = PendingIntent.getBroadcast(
+                        context, sessionId, callbackIntent,
+                        PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT);
+
+                // 세션 커밋
+                // → STATUS_PENDING_USER_ACTION으로 confirmationIntent가 appInstallReceiver에 도착
+                // → registerAppInstallReceiver의 STATUS_PENDING_USER_ACTION 케이스에서 startActivity 처리
+
                 session.commit(callbackPendingIntent.getIntentSender());
+                Log.i(Const.LOG_TAG, "PackageInstaller session committed for: " + packageName);
             }
-
-            Log.i(Const.LOG_TAG, "PackageInstaller session committed for: " + packageName);
-
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             Log.e(Const.LOG_TAG, "showInstallNotification failed: " + e.getMessage());
             InstallUtils.requestInstallApplication(context, file, new InstallUtils.InstallErrorHandler() {
                 @Override
@@ -1346,6 +1336,7 @@ public class ConfigUpdater {
             releaseWakeLock();
         }
     }
+
     private void uninstallApplication(final String packageName) {
         if (Utils.isDeviceOwner(context) || BuildConfig.SYSTEM_PRIVILEGES) {
             RemoteLogger.log(context, Const.LOG_INFO, "Silently uninstall app " + packageName);
@@ -1357,9 +1348,9 @@ public class ConfigUpdater {
     }
 
     // The following algorithm of launcher restart works in EMUI:
-    // Run EMUI_LAUNCHER_RESTARTER activity once and send the old version number to it.
-    // The restarter application will check the launcher version each second, and restart it
-    // when it is changed.
+// Run EMUI_LAUNCHER_RESTARTER activity once and send the old version number to it.
+// The restarter application will check the launcher version each second, and restart it
+// when it is changed.
     private void startLauncherRestarter() {
         // Sending an intent before updating, otherwise the launcher may be terminated at any time
         Intent intent = context.getPackageManager().getLaunchIntentForPackage(Const.LAUNCHER_RESTARTER_PACKAGE_ID);
@@ -1373,7 +1364,7 @@ public class ConfigUpdater {
     }
 
     // Create a new file from the template file
-    // (replace DEVICE_NUMBER, IMEI, CUSTOM* by their values)
+// (replace DEVICE_NUMBER, IMEI, CUSTOM* by their values)
     private void createFileFromTemplate(File srcFile, File dstFile, String deviceId, String imei, ServerConfig config) throws IOException {
         // We are supposed to process only small text files
         // So here we are reading the whole file, replacing variables, and save the content
