@@ -1,6 +1,10 @@
 package com.hmdm.launcher.helper;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,8 +18,10 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.util.Log;
 
+import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.hmdm.launcher.BuildConfig;
@@ -33,7 +39,6 @@ import com.hmdm.launcher.json.ServerConfig;
 import com.hmdm.launcher.pro.worker.DetailedInfoWorker;
 import com.hmdm.launcher.server.ServerServiceKeeper;
 import com.hmdm.launcher.service.PushLongPollingService;
-import com.hmdm.launcher.worker.PushNotificationWorker;
 import com.hmdm.launcher.task.ConfirmDeviceResetTask;
 import com.hmdm.launcher.task.ConfirmPasswordResetTask;
 import com.hmdm.launcher.task.ConfirmRebootTask;
@@ -45,11 +50,14 @@ import com.hmdm.launcher.util.PushNotificationMqttWrapper;
 import com.hmdm.launcher.util.RemoteLogger;
 import com.hmdm.launcher.util.SystemUtils;
 import com.hmdm.launcher.util.Utils;
+import com.hmdm.launcher.worker.PushNotificationWorker;
 
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
@@ -63,24 +71,43 @@ public class ConfigUpdater {
 
     public static interface UINotifier {
         void onConfigUpdateStart();
+
         void onConfigUpdateServerError(String errorText);
+
         void onConfigUpdateNetworkError(String errorText);
+
         void onConfigLoaded();
+
         void onPoliciesUpdated();
+
         void onFileDownloading(final RemoteFile remoteFile);
+
         void onDownloadProgress(final int progress, final long total, final long current);
+
         void onFileDownloadError(final RemoteFile remoteFile);
+
         void onFileInstallError(final RemoteFile remoteFile);
+
         void onAppUpdateStart();
+
         void onAppRemoving(final Application application);
+
         void onAppDownloading(final Application application);
+
         void onAppInstalling(final Application application);
+
         void onAppDownloadError(final Application application);
+
         void onAppInstallError(final String packageName);
+
         void onAppInstallComplete(final String packageName);
+
         void onConfigUpdateComplete();
+
         void onAllAppInstallComplete();
-    };
+    }
+
+    ;
 
     private boolean configInitializing;
     private Context context;
@@ -88,10 +115,11 @@ public class ConfigUpdater {
     private SettingsHelper settingsHelper;
     private Handler handler = new Handler(Looper.getMainLooper());
     private List<RemoteFile> filesForInstall = new LinkedList();
-    private List< Application > applicationsForInstall = new LinkedList();
-    private List< Application > applicationsForRun = new LinkedList();
-    private Map<String, File> pendingInstallations = new HashMap<String,File>();
+    private List<Application> applicationsForInstall = new LinkedList();
+    private List<Application> applicationsForRun = new LinkedList();
+    private Map<String, File> pendingInstallations = new HashMap<String, File>();
     private BroadcastReceiver appInstallReceiver;
+    private PowerManager.WakeLock wakeLock;
     private int retryCount;
     private int retryDelay;
     private boolean loadOnly = false;
@@ -130,7 +158,7 @@ public class ConfigUpdater {
     }
 
     public void updateConfig(final Context context, final UINotifier uiNotifier, final boolean userInteraction) {
-        if ( configInitializing ) {
+        if (configInitializing) {
             Log.i(Const.LOG_TAG, "updateConfig(): configInitializing=true, exiting");
             return;
         }
@@ -154,14 +182,14 @@ public class ConfigUpdater {
         if (uiNotifier != null) {
             uiNotifier.onConfigUpdateStart();
         }
-        new GetServerConfigTask( context ) {
+        new GetServerConfigTask(context) {
             @Override
-            protected void onPostExecute( Integer result ) {
-                super.onPostExecute( result );
+            protected void onPostExecute(Integer result) {
+                super.onPostExecute(result);
                 configInitializing = false;
                 Log.i(Const.LOG_TAG, "updateConfig(): set configInitializing=false after getting config");
 
-                switch ( result ) {
+                switch (result) {
                     case Const.TASK_SUCCESS:
                         RemoteLogger.log(context, Const.LOG_INFO, "Configuration updated");
                         updateRemoteLogConfig();
@@ -209,8 +237,8 @@ public class ConfigUpdater {
 
         GetRemoteLogConfigTask task = new GetRemoteLogConfigTask(context) {
             @Override
-            protected void onPostExecute( Integer result ) {
-                super.onPostExecute( result );
+            protected void onPostExecute(Integer result) {
+                super.onPostExecute(result);
                 Log.i(Const.LOG_TAG, "updateRemoteLogConfig(): result=" + result);
                 boolean deviceOwner = Utils.isDeviceOwner(context);
                 RemoteLogger.log(context, Const.LOG_INFO, "Device owner: " + deviceOwner);
@@ -331,9 +359,9 @@ public class ConfigUpdater {
             RemoteLogger.log(context, Const.LOG_INFO, "Device reset by server request");
             ConfirmDeviceResetTask confirmTask = new ConfirmDeviceResetTask(context) {
                 @Override
-                protected void onPostExecute( Integer result ) {
+                protected void onPostExecute(Integer result) {
                     // Do a factory reset if we can
-                    if (result == null || result != Const.TASK_SUCCESS ) {
+                    if (result == null || result != Const.TASK_SUCCESS) {
                         RemoteLogger.log(context, Const.LOG_WARN, "Failed to confirm device reset on server");
                     } else if (Utils.checkAdminMode(context)) {
                         // no_factory_reset restriction doesn't prevent against admin's reset action
@@ -365,8 +393,8 @@ public class ConfigUpdater {
             RemoteLogger.log(context, Const.LOG_INFO, "Rebooting by server request");
             ConfirmRebootTask confirmTask = new ConfirmRebootTask(context) {
                 @Override
-                protected void onPostExecute( Integer result ) {
-                    if (result == null || result != Const.TASK_SUCCESS ) {
+                protected void onPostExecute(Integer result) {
+                    if (result == null || result != Const.TASK_SUCCESS) {
                         RemoteLogger.log(context, Const.LOG_WARN, "Failed to confirm reboot on server");
                     } else if (Utils.checkAdminMode(context)) {
                         if (!Utils.reboot(context)) {
@@ -399,7 +427,7 @@ public class ConfigUpdater {
 
             ConfirmPasswordResetTask confirmTask = new ConfirmPasswordResetTask(context) {
                 @Override
-                protected void onPostExecute( Integer result ) {
+                protected void onPostExecute(Integer result) {
                     setDefaultLauncher();
                 }
             };
@@ -622,7 +650,7 @@ public class ConfigUpdater {
                 protected void onPostExecute(RemoteFileStatus fileStatus) {
                     if (fileStatus != null) {
                         if (!fileStatus.installed) {
-                            filesForInstall.add( 0, fileStatus.remoteFile );
+                            filesForInstall.add(0, fileStatus.remoteFile);
                             if (uiNotifier != null) {
                                 if (!fileStatus.downloaded) {
                                     uiNotifier.onFileDownloadError(fileStatus.remoteFile);
@@ -696,7 +724,7 @@ public class ConfigUpdater {
             }
             Log.d(Const.LOG_TAG, "Active network; " + activeNetwork.getTypeName() + ", download attempts: " + lastDownload.getAttempts());
             if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE &&
-            !lastDownload.isDownloaded() && lastDownload.getAttempts() > 3) {
+                    !lastDownload.isDownloaded() && lastDownload.getAttempts() > 3) {
                 RemoteLogger.log(context, Const.LOG_INFO, "Skip download due to previous download failures: " + objectId);
                 return false;
             }
@@ -781,13 +809,13 @@ public class ConfigUpdater {
                         uninstallApplication(application.getPkg());
 
                     } else if (application.getUrl() == null) {
-                        handler.post( new Runnable() {
+                        handler.post(new Runnable() {
                             @Override
                             public void run() {
                                 Log.i(Const.LOG_TAG, "loadAndInstallApplications(): proceed to next app");
                                 loadAndInstallApplications();
                             }
-                        } );
+                        });
 
                     } else if (application.getUrl().startsWith("market://details")) {
                         RemoteLogger.log(context, Const.LOG_INFO, "Installing app " + application.getPkg() + " from Google Play");
@@ -900,7 +928,7 @@ public class ConfigUpdater {
                                 applicationsForRun.add(applicationStatus.application);
                             }
                         } else {
-                            applicationsForInstall.add( 0, applicationStatus.application );
+                            applicationsForInstall.add(0, applicationStatus.application);
                             if (uiNotifier != null) {
                                 uiNotifier.onAppDownloadError(applicationStatus.application);
                             }
@@ -1055,6 +1083,7 @@ public class ConfigUpdater {
                                 }
                                 break;
                             case PackageInstaller.STATUS_SUCCESS:
+                                releaseWakeLock();
                                 String packageName = intent.getStringExtra(Const.PACKAGE_NAME);
                                 if (packageName != null) {
                                     RemoteLogger.log(context, Const.LOG_DEBUG, "App " + packageName + " installed successfully");
@@ -1111,6 +1140,7 @@ public class ConfigUpdater {
                                 break;
                             default:
                                 // Installation failure
+                                releaseWakeLock();
                                 String extraMessage = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
                                 String statusMessage = InstallUtils.getPackageInstallerStatusMessage(status);
                                 packageName = intent.getStringExtra(Const.PACKAGE_NAME);
@@ -1182,11 +1212,41 @@ public class ConfigUpdater {
         }
     }
 
+
+    private void acquireWakeLock() {
+        try {
+            if (wakeLock != null && wakeLock.isHeld()) {
+                return;
+            }
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            wakeLock = pm.newWakeLock(
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                    "hmdm:install"
+            );
+            wakeLock.acquire(10 * 60 * 1000L); // 최대 10분
+            Log.i(Const.LOG_TAG, "WakeLock acquired for installation");
+        } catch (Exception e) {
+            Log.e(Const.LOG_TAG, "Failed to acquire WakeLock: " + e.getMessage());
+        }
+    }
+
+    private void releaseWakeLock() {
+        try {
+            if (wakeLock != null && wakeLock.isHeld()) {
+                wakeLock.release();
+                wakeLock = null;
+                Log.i(Const.LOG_TAG, "WakeLock released after installation");
+            }
+        } catch (Exception e) {
+            Log.e(Const.LOG_TAG, "Failed to release WakeLock: " + e.getMessage());
+        }
+    }
+
     // This function is called from a background thread
-    private void installApplication( File file, final String packageName, final String version ) {
+    private void installApplication(File file, final String packageName, final String version) {
+        acquireWakeLock();
         if (packageName.equals(context.getPackageName()) &&
                 context.getPackageManager().getLaunchIntentForPackage(Const.LAUNCHER_RESTARTER_PACKAGE_ID) != null) {
-            // Restart self in EMUI: there's no auto restart after update in EMUI, we must use a helper app
             startLauncherRestarter();
         }
         String versionData = version == null || version.equals("0") ? "" : " " + version;
@@ -1197,6 +1257,7 @@ public class ConfigUpdater {
                 @Override
                 public void onInstallError(String msg) {
                     Log.i(Const.LOG_TAG, "installApplication(): error installing app " + packageName);
+                    releaseWakeLock();
                     pendingInstallations.remove(packageName);
                     if (file.exists()) {
                         file.delete();
@@ -1207,52 +1268,84 @@ public class ConfigUpdater {
                     if (msg != null) {
                         RemoteLogger.log(context, Const.LOG_WARN, "Failed to install app " + packageName + ": " + msg);
                     }
-                    // Save failed install attempt to prevent next downloads
                     saveFailedAttempt(context, null, "", file.getAbsolutePath(), true, false);
-                    /*
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            new AlertDialog.Builder(MainActivity.this)
-                                    .setMessage(getString(R.string.install_error) + " " + packageName)
-                                    .setPositiveButton(R.string.dialog_administrator_mode_continue, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            checkAndStartLauncher();
-                                        }
-                                    })
-                                    .create()
-                                    .show();
-                        }
-                    });
-                     */
                 }
             });
         } else {
             RemoteLogger.log(context, Const.LOG_INFO, "Asking user to install app " + packageName + versionData);
+            showInstallNotification(file, packageName);
+        }
+    }
+
+    private void showInstallNotification(File file, String packageName) {
+        try {
+            PackageInstaller packageInstaller = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                packageInstaller = context.getPackageManager().getPackageInstaller();
+            }
+            PackageInstaller.SessionParams params = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                params = new PackageInstaller.SessionParams(
+                        PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                params.setAppPackageName(packageName);
+            }
+            int sessionId = 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                sessionId = packageInstaller.createSession(params);
+            }
+            PackageInstaller.Session session = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                session = packageInstaller.openSession(sessionId);
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                try (FileInputStream in = new FileInputStream(file);
+                     OutputStream out = session.openWrite("COSU", 0, -1)) {
+                    byte[] buffer = new byte[65536];
+                    int c;
+                    while ((c = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, c);
+                    }
+                    session.fsync(out);
+                }
+            }
+
+            // 완료 콜백용 PendingIntent — appInstallReceiver가 수신
+            Intent callbackIntent = new Intent(Const.ACTION_INSTALL_COMPLETE);
+            callbackIntent.putExtra(Const.PACKAGE_NAME, packageName);
+            PendingIntent callbackPendingIntent = PendingIntent.getBroadcast(
+                    context, sessionId, callbackIntent,
+                    PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT);
+
+            // 세션 커밋
+            // → STATUS_PENDING_USER_ACTION으로 confirmationIntent가 appInstallReceiver에 도착
+            // → registerAppInstallReceiver의 STATUS_PENDING_USER_ACTION 케이스에서 startActivity 처리
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                session.commit(callbackPendingIntent.getIntentSender());
+            }
+
+            Log.i(Const.LOG_TAG, "PackageInstaller session committed for: " + packageName);
+
+        } catch (Exception e) {
+            Log.e(Const.LOG_TAG, "showInstallNotification failed: " + e.getMessage());
             InstallUtils.requestInstallApplication(context, file, new InstallUtils.InstallErrorHandler() {
                 @Override
                 public void onInstallError(String msg) {
                     pendingInstallations.remove(packageName);
-                    if (file.exists()) {
-                        file.delete();
-                    }
+                    if (file.exists()) file.delete();
                     if (msg != null) {
                         RemoteLogger.log(context, Const.LOG_WARN, "Failed to install app " + packageName + ": " + msg);
                     }
-                    // Save failed install attempt to prevent next downloads
                     saveFailedAttempt(context, null, "", file.getAbsolutePath(), true, false);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            loadAndInstallApplications();
-                        }
-                    });
+                    handler.post(() -> loadAndInstallApplications());
                 }
             });
+        } finally {
+            releaseWakeLock();
         }
     }
-
     private void uninstallApplication(final String packageName) {
         if (Utils.isDeviceOwner(context) || BuildConfig.SYSTEM_PRIVILEGES) {
             RemoteLogger.log(context, Const.LOG_INFO, "Silently uninstall app " + packageName);

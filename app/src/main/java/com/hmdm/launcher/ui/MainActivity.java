@@ -582,7 +582,8 @@ public class MainActivity
                 if (bottomAppListAdapter != null) {
                     return bottomAppListAdapter.onKey(keyCode);
                 }
-            };
+            }
+            ;
         }
         return super.onKeyUp(keyCode, event);
     }
@@ -677,7 +678,8 @@ public class MainActivity
             protected Void doInBackground(Void... voids) {
                 if (!SystemUtils.becomeDeviceOwnerByCommand(MainActivity.this)) {
                     SystemUtils.becomeDeviceOwnerByXmlFile(MainActivity.this);
-                };
+                }
+                ;
                 return null;
             }
 
@@ -1098,7 +1100,7 @@ public class MainActivity
             settingsHelper.setHost(host);
             settingsHelper.setPort(port);
             // Also update the base URL to include host and port
-            // Since getBaseUrl() now uses host and port, we can just clear the old base url 
+            // Since getBaseUrl() now uses host and port, we can just clear the old base url
             // to force it to use host/port logic, or update it.
             // But wait, getBaseUrl() priority logic is: if host is set, use it.
             // So we should also clear the old base url to avoid confusion if the user wants to go back to a full URL.
