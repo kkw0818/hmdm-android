@@ -130,6 +130,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 
 import okhttp3.Cache;
@@ -415,6 +416,11 @@ public class MainActivity
 
         initTestAdminRemovalButton();
 
+        // settingsHelper.getImei() is "" by default, it is non-null
+        if (Utils.isDeviceOwner(this) && "".equals(settingsHelper.getImei())) {
+            settingsHelper.setImei(DeviceInfoProvider.getImei(this, 0));
+        }
+
         Initializer.init(this, () -> {
 
             // Try to start services in onCreate(), this may fail, we will try again on each onResume.
@@ -546,7 +552,16 @@ public class MainActivity
             return;
         }
 
-        setDefaultLauncherEarly();
+        if (!BuildConfig.SYSTEM_PRIVILEGES) {
+            if (firstStartAfterProvisioning) {
+                firstStartAfterProvisioning = false;
+                waitForProvisioning(10);
+            } else {
+                setDefaultLauncherEarly();
+            }
+        } else {
+            setSelfAsDeviceOwner();
+        }
     }
 
     private void lockOrientation() {
@@ -567,8 +582,7 @@ public class MainActivity
                 if (bottomAppListAdapter != null) {
                     return bottomAppListAdapter.onKey(keyCode);
                 }
-            }
-            ;
+            };
         }
         return super.onKeyUp(keyCode, event);
     }
@@ -601,19 +615,10 @@ public class MainActivity
     private void startAppsAtBoot() {
         // Let's assume that we start within two minutes after boot
         // This should work even for slow devices
-
-        /// TODO
-        /// 여기에 서버와의 통신 넣어놓기
-
-        /// api 받아오는거 넣고
-        ///
-
         long uptimeMillis = SystemClock.uptimeMillis();
         if (uptimeMillis > BOOT_DURATION_SEC * 1000) {
             return;
         }
-
-        ///  이거 확인해서 위에서 가져온 컨피그 집어넣는 코드 만들고
         final ServerConfig config = settingsHelper.getConfig();
         if (config == null || config.getApplications() == null) {
             // First start
@@ -659,6 +664,30 @@ public class MainActivity
 
     }
 
+    // Does not seem to work, though. See the comment to SystemUtils.becomeDeviceOwner()
+    private void setSelfAsDeviceOwner() {
+        // We set self as device owner each time so we could trace errors if device owner setup fails
+        if (Utils.isDeviceOwner(this)) {
+            checkAndStartLauncher();
+            return;
+        }
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if (!SystemUtils.becomeDeviceOwnerByCommand(MainActivity.this)) {
+                    SystemUtils.becomeDeviceOwnerByXmlFile(MainActivity.this);
+                };
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void v) {
+                setDefaultLauncherEarly();
+            }
+        }.execute();
+    }
+
     private void startServices() {
         // Foreground apps checks are not available in a free version: services are the stubs
         if (preferences.getInt(Const.PREFERENCES_USAGE_STATISTICS, Const.PREFERENCES_OFF) == Const.PREFERENCES_ON) {
@@ -683,6 +712,19 @@ public class MainActivity
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST) {
+            if (Utils.isDeviceOwner(this)) {
+                // Even in device owner mode, if "Ask for location" is requested by the admin,
+                // let's ask permissions (so do nothing here, fall through)
+                if (settingsHelper.getConfig() == null || !ServerConfig.APP_PERMISSIONS_ASK_ALL.equals(settingsHelper.getConfig().getAppPermissions()) &&
+                        !ServerConfig.APP_PERMISSIONS_ASK_LOCATION.equals(settingsHelper.getConfig().getAppPermissions())) {
+                    // This may be called on Android 10, not sure why; just continue the flow
+                    Log.i(Const.LOG_TAG, "Called onRequestPermissionsResult: permissions=" + Arrays.toString(permissions) +
+                            ", grantResults=" + Arrays.toString(grantResults));
+                    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                    return;
+                }
+            }
+
             boolean locationDisabled = false;
             for (int n = 0; n < permissions.length; n++) {
                 if (permissions[n].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -738,12 +780,37 @@ public class MainActivity
     }
 
     private void setDefaultLauncherEarly() {
+        ServerConfig config = SettingsHelper.getInstance(this).getConfig();
+        if (BuildConfig.SET_DEFAULT_LAUNCHER_EARLY && config == null && Utils.isDeviceOwner(this)) {
+            // At first start, temporarily set Headwind MDM as a default launcher
+            // to prevent the user from clicking Home to stop running Headwind MDM
+            String defaultLauncher = Utils.getDefaultLauncher(this);
+
+            // As per the documentation, setting the default preferred activity should not be done on the main thread
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    if (!getPackageName().equalsIgnoreCase(defaultLauncher)) {
+                        Utils.setDefaultLauncher(MainActivity.this);
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void v) {
+                    checkAndStartLauncher();
+                }
+            }.execute();
+            return;
+        }
         checkAndStartLauncher();
     }
 
     private void checkAndStartLauncher() {
 
-        preferences.edit().putInt(Const.PREFERENCES_DEVICE_OWNER, Const.PREFERENCES_OFF).commit();
+        boolean deviceOwner = Utils.isDeviceOwner(this);
+        preferences.edit().putInt(Const.PREFERENCES_DEVICE_OWNER, deviceOwner ?
+                Const.PREFERENCES_ON : Const.PREFERENCES_OFF).commit();
 
         int miuiPermissionMode = preferences.getInt(Const.PREFERENCES_MIUI_PERMISSIONS, -1);
         if (miuiPermissionMode == -1) {
@@ -782,7 +849,7 @@ public class MainActivity
         }
 
         int unknownSourceMode = preferences.getInt(Const.PREFERENCES_UNKNOWN_SOURCES, -1);
-        if (unknownSourceMode == -1) {
+        if (!deviceOwner && unknownSourceMode == -1) {
             if (checkUnknownSources()) {
                 preferences.edit().putInt(Const.PREFERENCES_UNKNOWN_SOURCES, Const.PREFERENCES_ON).commit();
             } else {
@@ -790,8 +857,19 @@ public class MainActivity
             }
         }
 
-        Log.i(Const.LOG_TAG, "checkAndStartLauncher: skipping admin mode check (no device owner)");
-        preferences.edit().putInt(Const.PREFERENCES_ADMINISTRATOR, Const.PREFERENCES_ON).commit();
+        int administratorMode = preferences.getInt(Const.PREFERENCES_ADMINISTRATOR, -1);
+//        RemoteLogger.log(this, Const.LOG_DEBUG, "Saved device admin state: " + administratorMode);
+        if (administratorMode == -1) {
+            if (checkAdminMode()) {
+                RemoteLogger.log(this, Const.LOG_DEBUG, "Saving device admin state as 1 (TRUE)");
+                preferences.
+                        edit().
+                        putInt(Const.PREFERENCES_ADMINISTRATOR, Const.PREFERENCES_ON).
+                        commit();
+            } else {
+                return;
+            }
+        }
 
         int overlayMode = preferences.getInt(Const.PREFERENCES_OVERLAY, -1);
         if (ProUtils.isPro() && overlayMode == -1 && needRequestOverlay()) {
@@ -1148,6 +1226,15 @@ public class MainActivity
             showContent(settingsHelper.getConfig());
         }
     }
+
+    private boolean checkAdminMode() {
+        if (!Utils.checkAdminMode(this)) {
+            createAndShowAdministratorDialog();
+            return false;
+        }
+        return true;
+    }
+
 
     private void fetchInitConfigFromBootServer() {
         Log.i(Const.LOG_TAG, "fetchInitConfigFromBootServer: start - calling " + RestfulClient.getApiService());
@@ -2031,7 +2118,7 @@ public class MainActivity
             needSendDeviceInfoAfterReconfigure = false;
             try {
                 SendDeviceInfoTask sendDeviceInfoTask = new SendDeviceInfoTask(this);
-                DeviceInfo deviceInfo = DeviceInfoProvider.getDeviceInfo(this, false, false);
+                DeviceInfo deviceInfo = DeviceInfoProvider.getDeviceInfo(this, true, true);
                 sendDeviceInfoTask.execute(deviceInfo);
             } catch (Exception e) {
                 Log.e(Const.LOG_TAG, "sendDeviceInfoAfterReconfigure: failed - " + e.getMessage());
