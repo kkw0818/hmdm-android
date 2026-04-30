@@ -24,7 +24,7 @@
 
     <LinearLayout
           android:orientation="vertical"
-          android:layout_width="wrap_content"
+          android:layout_width="match_parent"
           android:layout_height="match_parent"
           android:gravity="center"
           android:paddingTop="@dimen/activity_vertical_margin"
@@ -34,7 +34,10 @@
           tools:context="com.hmdm.launcher.ui.MainActivity">
 
         <TextView
+            style="@style/ts_body_10_16"
+            android:textColor="@color/white"
             android:id="@+id/hint"
+            android:layout_marginTop="16dp"
             android:layout_width="@dimen/dialog_enter_device_id_width"
             android:layout_height="wrap_content"
             android:text="@string/dialog_overlay_settings_title"
@@ -50,7 +53,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="8dp"
+                android:layout_marginRight="4dp"
                 android:text="@string/dialog_accessibility_service_skip"
                 android:textSize="@dimen/button_text_size"
                 android:onClick="overlayWithoutPermission"/>
@@ -59,7 +62,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
+                android:layout_marginLeft="4dp"
                 android:text="@string/dialog_accessibility_service_continue"
                 android:textSize="@dimen/button_text_size"
                 android:onClick="continueOverlay"/>

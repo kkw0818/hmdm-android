@@ -1,75 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Server Configuration"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="24dp"
-        android:gravity="center" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Host"
-        android:textSize="14sp"
-        android:layout_marginBottom="4dp"/>
-
-    <EditText
-        android:id="@+id/edit_host"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="e.g. 192.168.1.10"
-        android:inputType="textUri"
-        android:minHeight="56dp"
-        android:padding="12dp"
-        android:layout_marginBottom="16dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Port"
-        android:textSize="14sp"
-        android:layout_marginBottom="4dp"/>
-
-    <EditText
-        android:id="@+id/edit_port"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="e.g. 8080"
-        android:inputType="number"
-        android:minHeight="56dp"
-        android:padding="12dp"
-        android:layout_marginBottom="24dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <Button
-            android:id="@+id/btn_cancel"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
+        <TextView
+            style="@style/ts_body_20_24"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Cancel" />
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:text="서버 설정"
+            android:textColor="@color/white" />
 
-        <Button
-            android:id="@+id/btn_ok"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/ts_body_12_20"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="Host"
+                    android:textColor="@color/white" />
+
+                <EditText
+                    android:id="@+id/edit_host"
+                    style="@style/ts_body_12_20"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:hint="e.g. 192.168.1.10"
+                    android:inputType="textUri"
+                    android:minHeight="36dp"
+                    android:padding="12dp"
+                    android:textColor="@color/white" />
+
+                <TextView
+                    style="@style/ts_body_12_20"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="Port"
+                    android:textColor="@color/white" />
+
+                <EditText
+                    android:id="@+id/edit_port"
+                    style="@style/ts_body_12_20"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:hint="e.g. 8080"
+                    android:inputType="number"
+                    android:minHeight="36dp"
+                    android:padding="12dp"
+                    android:textColor="@color/white" />
+
+
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="OK"
-            android:textStyle="bold" />
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Cancel" />
+
+            <Button
+                android:id="@+id/btn_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="OK"
+                android:textStyle="bold" />
+        </LinearLayout>
+
     </LinearLayout>
-
-</LinearLayout>
 </layout>

@@ -139,16 +139,6 @@ public class MdmChoiceSetupActivity extends AppCompatActivity {
         if (serial != null && !serial.equals(Build.UNKNOWN)) {
             variantsList.add(serial);
         }
-        if (variantsList.size() > 0) {
-            String[] variantsArray = variantsList.toArray(new String[variantsList.size()]);
-            enterDeviceIdDialogBinding.deviceId.setThreshold(0);
-            enterDeviceIdDialogBinding.deviceId.setAdapter(new ArrayAdapter<String>(this,
-                    android.R.layout.select_dialog_item, variantsArray));
-        } else {
-            enterDeviceIdDialogBinding.showDeviceIdVariants.setVisibility(View.GONE);
-        }
-
-        enterDeviceIdDialogBinding.showDeviceIdQrCode.setVisibility(View.GONE);
 
         enterDeviceIdDialog.setContentView( enterDeviceIdDialogBinding.getRoot() );
         enterDeviceIdDialog.show();

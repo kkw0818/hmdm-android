@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Headwind MDM: Open Source Android MDM Software
   ~ https://h-mdm.com
   ~
@@ -19,77 +18,89 @@
   -->
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
-          android:orientation="vertical"
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:gravity="center"
-          android:paddingTop="@dimen/activity_vertical_margin"
-          android:paddingBottom="@dimen/activity_vertical_margin"
-          android:paddingLeft="@dimen/activity_horizontal_margin"
-          android:paddingRight="@dimen/activity_horizontal_margin"
-          tools:context="com.hmdm.launcher.ui.MainActivity">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        tools:context="com.hmdm.launcher.ui.MainActivity">
 
         <TextView
             android:id="@+id/title"
+            style="@style/ts_body_12_20"
             android:layout_width="@dimen/dialog_enter_device_id_width"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:text="@string/dialog_network_error_title"/>
+            android:text="@string/dialog_network_error_title"
+            android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/details"
             android:layout_width="@dimen/dialog_enter_device_id_width"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:text="@string/main_activity_details"
-            android:textColor="@color/colorAccent"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:onClick="networkErrorDetailsClicked"
-            />
+            android:text="@string/main_activity_details"
+            android:textColor="@color/colorAccent" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center_vertical|center_horizontal"
-            android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/repeatButton"
+                style="@style/ts_body_12_20"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:onClick="networkErrorRepeatClicked"
                 android:text="@string/main_activity_repeat"
-                android:onClick="networkErrorRepeatClicked"/>
+                android:textColor="@color/white" />
 
             <Button
                 android:id="@+id/resetButton"
+                style="@style/ts_body_12_20"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:onClick="networkErrorResetClicked"
                 android:text="@string/main_activity_reset"
-                android:onClick="networkErrorResetClicked"/>
+                android:textColor="@color/white" />
+        </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_vertical|center_horizontal"
+            android:orientation="horizontal">
             <Button
                 android:id="@+id/wifiButton"
+                style="@style/ts_body_12_20"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:onClick="networkErrorWifiClicked"
                 android:text="@string/main_activity_wifi"
-                android:onClick="networkErrorWifiClicked"/>
-
+                android:textColor="@color/white" />
             <Button
                 android:id="@+id/cancelButton"
+                style="@style/ts_body_12_20"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:onClick="networkErrorCancelClicked"
                 android:text="@string/main_activity_cancel"
-                android:onClick="networkErrorCancelClicked"/>
-
+                android:textColor="@color/white" />
         </LinearLayout>
 
     </LinearLayout>

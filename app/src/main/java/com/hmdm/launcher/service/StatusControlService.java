@@ -159,19 +159,6 @@ public class StatusControlService extends Service {
             }
         }
 
-        if (config.getGps() != null) {
-            LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-            if (lm != null) {
-                boolean enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                if (config.getGps() && !enabled) {
-                    notifyStatusViolation(Const.GPS_ON_REQUIRED);
-                    return;
-                } else if (!config.getGps() && enabled) {
-                    notifyStatusViolation(Const.GPS_OFF_REQUIRED);
-                    return;
-                }
-            }
-        }
 
         if (config.getMobileData() != null) {
             ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
